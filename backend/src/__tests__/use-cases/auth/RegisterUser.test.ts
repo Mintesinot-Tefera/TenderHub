@@ -1,0 +1,137 @@
+import { RegisterUser } from '../../../application/use-cases/auth/RegisterUser';
+import { IUserRepository } from '../../../domain/repositories/IUserRepository';
+import { IPasswordHasher } from '../../../application/services/IPasswordHasher';
+import { ITokenService } from '../../../application/services/ITokenService';
+import { UserRole, User } from '../../../domain/entities/User';
+
+const makeUser = (overrides: Partial<User> = {}): User => ({
+  id: 'u1',
+  email: 'test@example.com',
+  passwordHash: 'hashed',
+  fullName: 'Test User',
+  role: UserRole.BIDDER,
+  companyName: null,
+  phone: null,
+  avatarUrl: null,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  ...overrides,
+});
+
+describe('RegisterUser', () => {
+  let userRepo: jest.Mocked<IUserRepository>;
+  let hasher: jest.Mocked<IPasswordHasher>;
+  let tokenService: jest.Mocked<ITokenService>;
+  let useCase: RegisterUser;
+
+  beforeEach(() => {
+    userRepo = {
+      findById: jest.fn(),
+      findByEmail: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+    };
+    hasher = {
+      hash: jest.fn(),
+      compare: jest.fn(),
+    };
+    tokenService = {
+      sign: jest.fn(),
+      verify: jest.fn(),
+    };
+    useCase = new RegisterUser(userRepo, hasher, tokenService);
+  });
+
+  it('rejects admin self-registration', async () => {
+    await expect(
+      useCase.execute({
+        email: 'admin@test.com',
+        password: 'password123',
+        fullName: 'Admin',
+        role: UserRole.ADMIN,
+      })
+    ).rejects.toMatchObject({ statusCode: 400, code: 'VALIDATION_ERROR' });
+  });
+
+  it('rejects duplicate email', async () => {
+    userRepo.findByEmail.mockResolvedValue(makeUser());
+
+    await expect(
+      useCase.execute({
+        email: 'test@example.com',
+        password: 'password123',
+        fullName: 'Test',
+        role: UserRole.BIDDER,
+      })
+    ).rejects.toMatchObject({ statusCode: 409, code: 'CONFLICT' });
+  });
+
+  it('registers a new user successfully', async () => {
+    userRepo.findByEmail.mockResolvedValue(null);
+    hasher.hash.mockResolvedValue('hashed_pw');
+    const createdUser = makeUser({ email: 'new@example.com' });
+    userRepo.create.mockResolvedValue(createdUser);
+    tokenService.sign.mockReturnValue('jwt_token');
+
+    const result = await useCase.execute({
+      email: 'New@Example.com',
+      password: 'password123',
+      fullName: 'New User',
+      role: UserRole.BIDDER,
+    });
+
+    expect(userRepo.findByEmail).toHaveBeenCalledWith('new@example.com');
+    expect(hasher.hash).toHaveBeenCalledWith('password123');
+    expect(userRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: 'new@example.com',
+        passwordHash: 'hashed_pw',
+        role: UserRole.BIDDER,
+      })
+    );
+    expect(result.token).toBe('jwt_token');
+    expect(result.user).not.toHaveProperty('passwordHash');
+  });
+
+  it('normalizes email to lowercase', async () => {
+    userRepo.findByEmail.mockResolvedValue(null);
+    hasher.hash.mockResolvedValue('hashed');
+    userRepo.create.mockResolvedValue(makeUser());
+    tokenService.sign.mockReturnValue('token');
+
+    await useCase.execute({
+      email: 'UPPER@TEST.COM',
+      password: 'password123',
+      fullName: 'User',
+      role: UserRole.ORGANIZATION,
+    });
+
+    expect(userRepo.findByEmail).toHaveBeenCalledWith('upper@test.com');
+    expect(userRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({ email: 'upper@test.com' })
+    );
+  });
+
+  it('passes optional companyName and phone to create', async () => {
+    userRepo.findByEmail.mockResolvedValue(null);
+    hasher.hash.mockResolvedValue('hashed');
+    userRepo.create.mockResolvedValue(makeUser());
+    tokenService.sign.mockReturnValue('token');
+
+    await useCase.execute({
+      email: 'org@test.com',
+      password: 'password123',
+      fullName: 'Org User',
+      role: UserRole.ORGANIZATION,
+      companyName: 'Acme Corp',
+      phone: '+251911234567',
+    });
+
+    expect(userRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        companyName: 'Acme Corp',
+        phone: '+251911234567',
+      })
+    );
+  });
+});

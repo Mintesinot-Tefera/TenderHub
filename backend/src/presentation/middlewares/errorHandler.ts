@@ -1,0 +1,44 @@
+import { Request, Response, NextFunction } from 'express';
+import { ZodError } from 'zod';
+import multer from 'multer';
+import { AppError } from '../../domain/errors/AppError';
+
+export const errorHandler = (
+  err: Error,
+  _req: Request,
+  res: Response,
+  _next: NextFunction
+): void => {
+  if (err instanceof AppError) {
+    res.status(err.statusCode).json({
+      error: { code: err.code, message: err.message },
+    });
+    return;
+  }
+
+  if (err instanceof ZodError) {
+    res.status(400).json({
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: err.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(', '),
+      },
+    });
+    return;
+  }
+
+  if (err instanceof multer.MulterError) {
+    const message =
+      err.code === 'LIMIT_FILE_SIZE'
+        ? 'File size must be less than 5 MB'
+        : `Upload error: ${err.message}`;
+    res.status(400).json({
+      error: { code: 'UPLOAD_ERROR', message },
+    });
+    return;
+  }
+
+  console.error('Unhandled error:', err);
+  res.status(500).json({
+    error: { code: 'INTERNAL_ERROR', message: 'Internal server error' },
+  });
+};
