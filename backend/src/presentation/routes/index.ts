@@ -23,9 +23,37 @@ router.patch('/auth/profile', authMiddleware, asyncHandler(authController.update
 // --- Categories (public) ---
 router.get('/categories', asyncHandler(categoryController.list));
 
+// --- Tenders: org-owned routes (must come before /:id) ---
+router.get(
+  '/tenders/my',
+  authMiddleware,
+  requireRole(UserRole.ORGANIZATION),
+  asyncHandler(tenderController.myTenders)
+);
+router.post(
+  '/tenders',
+  authMiddleware,
+  requireRole(UserRole.ORGANIZATION),
+  asyncHandler(tenderController.create)
+);
+
 // --- Tenders (public read) ---
 router.get('/tenders', asyncHandler(tenderController.list));
 router.get('/tenders/:id', asyncHandler(tenderController.getById));
+
+// --- Tender management (org only) ---
+router.patch(
+  '/tenders/:id',
+  authMiddleware,
+  requireRole(UserRole.ORGANIZATION),
+  asyncHandler(tenderController.update)
+);
+router.patch(
+  '/tenders/:id/status',
+  authMiddleware,
+  requireRole(UserRole.ORGANIZATION),
+  asyncHandler(tenderController.updateStatus)
+);
 
 // --- Discussions (public read, authenticated write) ---
 router.get('/tenders/:id/discussions', asyncHandler(discussionController.listForTender));
@@ -33,6 +61,14 @@ router.post(
   '/tenders/:id/discussions',
   authMiddleware,
   asyncHandler(discussionController.create)
+);
+
+// --- Org: view bids on their tenders ---
+router.get(
+  '/tenders/:id/bids',
+  authMiddleware,
+  requireRole(UserRole.ORGANIZATION),
+  asyncHandler(bidController.getTenderBids)
 );
 
 // --- Bids (bidder only) ---
@@ -61,6 +97,14 @@ router.delete(
   authMiddleware,
   requireRole(UserRole.BIDDER),
   asyncHandler(bidController.withdraw)
+);
+
+// --- Bid review (org only) ---
+router.patch(
+  '/bids/:id/review',
+  authMiddleware,
+  requireRole(UserRole.ORGANIZATION),
+  asyncHandler(bidController.review)
 );
 
 export default router;

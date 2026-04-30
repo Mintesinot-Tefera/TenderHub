@@ -58,6 +58,25 @@ export const submitBidSchema = z.object({
   deliveryDays: z.coerce.number().int().positive(),
 });
 
+export const createTenderSchema = z.object({
+  title: z.string().min(5, 'Title must be at least 5 characters'),
+  description: z.string().min(20, 'Description must be at least 20 characters'),
+  categoryId: z.string().uuid('Invalid category'),
+  budgetMin: z.coerce.number().positive().optional().nullable(),
+  budgetMax: z.coerce.number().positive().optional().nullable(),
+  deadline: z.coerce.date(),
+  location: optionalString,
+  requirements: optionalString,
+});
+
+export const updateTenderStatusSchema = z.object({
+  action: z.enum(['close', 'cancel']),
+});
+
+export const reviewBidSchema = z.object({
+  action: z.enum(['under_review', 'accept', 'reject']),
+});
+
 export const uuidParamSchema = z.object({
   id: z.string().uuid(),
 });

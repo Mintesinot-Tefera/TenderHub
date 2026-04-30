@@ -9,6 +9,9 @@ import { RegisterPage } from './pages/RegisterPage';
 import { TenderDetailPage } from './pages/TenderDetailPage';
 import { MyBidsPage } from './pages/MyBidsPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { OrgTendersPage } from './pages/OrgTendersPage';
+import { TenderFormPage } from './pages/TenderFormPage';
+import { OrgTenderBidsPage } from './pages/OrgTenderBidsPage';
 import type { UserRole } from './types';
 
 function Layout() {
@@ -55,6 +58,12 @@ function AppRoutes() {
         <Route path="/tenders/:id" element={<TenderDetailPage />} />
         <Route element={<ProtectedRoute roles={['BIDDER']} />}>
           <Route path="/my-bids" element={<MyBidsPage />} />
+        </Route>
+        <Route element={<ProtectedRoute roles={['ORGANIZATION']} />}>
+          <Route path="/org/tenders" element={<OrgTendersPage />} />
+          <Route path="/org/tenders/new" element={<TenderFormPage />} />
+          <Route path="/org/tenders/:id/edit" element={<TenderFormPage />} />
+          <Route path="/org/tenders/:id/bids" element={<OrgTenderBidsPage />} />
         </Route>
         <Route element={<ProtectedRoute roles={['ADMIN', 'ORGANIZATION', 'BIDDER']} />}>
           <Route path="/profile" element={<ProfilePage />} />

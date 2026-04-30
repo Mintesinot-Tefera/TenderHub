@@ -6,6 +6,8 @@ import {
   TenderFilters,
   PaginatedTenders,
   TenderStatus,
+  CreateTenderProps,
+  UpdateTenderProps,
 } from '../../domain/entities/Tender';
 
 interface TenderRow {
@@ -142,5 +144,68 @@ export class PgTenderRepository implements ITenderRepository {
       [id]
     );
     return rows[0] ? mapBasic(rows[0]) : null;
+  }
+
+  async findByOrganization(organizationId: string): Promise<TenderWithRelations[]> {
+    const { rows } = await this.pool.query<TenderJoinRow>(
+      `${SELECT_WITH_RELATIONS}
+       WHERE t.organization_id = $1
+       ORDER BY t.created_at DESC`,
+      [organizationId]
+    );
+    return rows.map(mapWithRelations);
+  }
+
+  async create(props: CreateTenderProps, referenceNumber: string): Promise<TenderWithRelations> {
+    const { rows } = await this.pool.query<TenderRow>(
+      `INSERT INTO tenders
+         (title, description, reference_number, category_id, organization_id,
+          budget_min, budget_max, deadline, location, requirements)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       RETURNING *`,
+      [
+        props.title,
+        props.description,
+        referenceNumber,
+        props.categoryId,
+        props.organizationId,
+        props.budgetMin ?? null,
+        props.budgetMax ?? null,
+        props.deadline,
+        props.location ?? null,
+        props.requirements ?? null,
+      ]
+    );
+    return (await this.findById(rows[0].id))!;
+  }
+
+  async update(id: string, props: UpdateTenderProps): Promise<TenderWithRelations> {
+    await this.pool.query(
+      `UPDATE tenders
+       SET title = $2, description = $3, category_id = $4,
+           budget_min = $5, budget_max = $6, deadline = $7,
+           location = $8, requirements = $9, updated_at = NOW()
+       WHERE id = $1`,
+      [
+        id,
+        props.title,
+        props.description,
+        props.categoryId,
+        props.budgetMin ?? null,
+        props.budgetMax ?? null,
+        props.deadline,
+        props.location ?? null,
+        props.requirements ?? null,
+      ]
+    );
+    return (await this.findById(id))!;
+  }
+
+  async updateStatus(id: string, status: TenderStatus): Promise<Tender> {
+    const { rows } = await this.pool.query<TenderRow>(
+      `UPDATE tenders SET status = $2, updated_at = NOW() WHERE id = $1 RETURNING *`,
+      [id, status]
+    );
+    return mapBasic(rows[0]);
   }
 }

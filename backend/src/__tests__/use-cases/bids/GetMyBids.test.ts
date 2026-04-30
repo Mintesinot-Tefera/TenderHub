@@ -12,7 +12,9 @@ describe('GetMyBids', () => {
       findById: jest.fn(),
       findByTenderAndBidder: jest.fn(),
       findByBidder: jest.fn(),
+      findByTender: jest.fn(),
       update: jest.fn(),
+      updateStatus: jest.fn(),
       withdraw: jest.fn(),
     };
     useCase = new GetMyBids(bidRepo);

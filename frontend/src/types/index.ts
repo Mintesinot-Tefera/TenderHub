@@ -118,3 +118,22 @@ export interface ApiError {
     message: string;
   };
 }
+
+export interface CreateTenderPayload {
+  title: string;
+  description: string;
+  categoryId: string;
+  budgetMin?: number | null;
+  budgetMax?: number | null;
+  deadline: string;
+  location?: string | null;
+  requirements?: string | null;
+}
+
+export type UpdateTenderPayload = CreateTenderPayload;
+
+export interface BidWithBidder extends Bid {
+  bidderName: string;
+  bidderEmail: string;
+  bidderCompany: string | null;
+}

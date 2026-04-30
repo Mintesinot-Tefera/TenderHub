@@ -33,6 +33,10 @@ describe('GetTenderById', () => {
       findAll: jest.fn(),
       findById: jest.fn(),
       findBasicById: jest.fn(),
+      findByOrganization: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      updateStatus: jest.fn(),
     };
     useCase = new GetTenderById(tenderRepo);
   });
@@ -68,6 +72,10 @@ describe('ListTenders', () => {
       findAll: jest.fn(),
       findById: jest.fn(),
       findBasicById: jest.fn(),
+      findByOrganization: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      updateStatus: jest.fn(),
     };
     useCase = new ListTenders(tenderRepo);
   });

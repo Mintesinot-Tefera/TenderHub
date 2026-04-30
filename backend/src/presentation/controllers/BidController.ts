@@ -3,14 +3,18 @@ import { SubmitBid } from '../../application/use-cases/bids/SubmitBid';
 import { GetMyBids } from '../../application/use-cases/bids/GetMyBids';
 import { UpdateBid } from '../../application/use-cases/bids/UpdateBid';
 import { WithdrawBid } from '../../application/use-cases/bids/WithdrawBid';
-import { submitBidSchema, uuidParamSchema } from '../validators/schemas';
+import { GetTenderBids } from '../../application/use-cases/bids/GetTenderBids';
+import { ReviewBid, ReviewAction } from '../../application/use-cases/bids/ReviewBid';
+import { submitBidSchema, uuidParamSchema, reviewBidSchema } from '../validators/schemas';
 
 export class BidController {
   constructor(
     private readonly submitBid: SubmitBid,
     private readonly getMyBids: GetMyBids,
     private readonly updateBid: UpdateBid,
-    private readonly withdrawBid: WithdrawBid
+    private readonly withdrawBid: WithdrawBid,
+    private readonly getTenderBidsUC: GetTenderBids,
+    private readonly reviewBidUC: ReviewBid
   ) {}
 
   submit = async (req: Request, res: Response): Promise<void> => {
@@ -62,6 +66,26 @@ export class BidController {
       bidderId: req.user!.userId,
     });
 
+    res.json(bid);
+  };
+
+  getTenderBids = async (req: Request, res: Response): Promise<void> => {
+    const { id: tenderId } = uuidParamSchema.parse(req.params);
+    const bids = await this.getTenderBidsUC.execute({
+      tenderId,
+      organizationId: req.user!.userId,
+    });
+    res.json(bids);
+  };
+
+  review = async (req: Request, res: Response): Promise<void> => {
+    const { id } = uuidParamSchema.parse(req.params);
+    const { action } = reviewBidSchema.parse(req.body);
+    const bid = await this.reviewBidUC.execute({
+      bidId: id,
+      organizationId: req.user!.userId,
+      action: action as ReviewAction,
+    });
     res.json(bid);
   };
 }

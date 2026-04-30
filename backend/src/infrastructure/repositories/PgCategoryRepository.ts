@@ -27,4 +27,12 @@ export class PgCategoryRepository implements ICategoryRepository {
     );
     return rows.map(mapRow);
   }
+
+  async findById(id: string): Promise<Category | null> {
+    const { rows } = await this.pool.query<CategoryRow>(
+      'SELECT * FROM categories WHERE id = $1',
+      [id]
+    );
+    return rows[0] ? mapRow(rows[0]) : null;
+  }
 }

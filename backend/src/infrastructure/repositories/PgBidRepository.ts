@@ -6,6 +6,7 @@ import {
   UpdateBidProps,
   BidStatus,
   BidWithTender,
+  BidWithBidder,
 } from '../../domain/entities/Bid';
 
 interface BidRow {
@@ -28,6 +29,12 @@ interface BidJoinRow extends BidRow {
   tender_status: string;
 }
 
+interface BidWithBidderRow extends BidRow {
+  bidder_name: string;
+  bidder_email: string;
+  bidder_company: string | null;
+}
+
 const mapRow = (r: BidRow): Bid => ({
   id: r.id,
   tenderId: r.tender_id,
@@ -47,6 +54,13 @@ const mapWithTender = (r: BidJoinRow): BidWithTender => ({
   tenderReferenceNumber: r.tender_reference_number,
   tenderDeadline: r.tender_deadline,
   tenderStatus: r.tender_status,
+});
+
+const mapWithBidder = (r: BidWithBidderRow): BidWithBidder => ({
+  ...mapRow(r),
+  bidderName: r.bidder_name,
+  bidderEmail: r.bidder_email,
+  bidderCompany: r.bidder_company,
 });
 
 export class PgBidRepository implements IBidRepository {
@@ -115,6 +129,30 @@ export class PgBidRepository implements IBidRepository {
        WHERE id = $1
        RETURNING *`,
       [id]
+    );
+    return mapRow(rows[0]);
+  }
+
+  async findByTender(tenderId: string): Promise<BidWithBidder[]> {
+    const { rows } = await this.pool.query<BidWithBidderRow>(
+      `SELECT
+         b.*,
+         u.full_name AS bidder_name,
+         u.email AS bidder_email,
+         u.company_name AS bidder_company
+       FROM bids b
+       JOIN users u ON u.id = b.bidder_id
+       WHERE b.tender_id = $1 AND b.status != 'WITHDRAWN'
+       ORDER BY b.created_at ASC`,
+      [tenderId]
+    );
+    return rows.map(mapWithBidder);
+  }
+
+  async updateStatus(id: string, status: BidStatus): Promise<Bid> {
+    const { rows } = await this.pool.query<BidRow>(
+      `UPDATE bids SET status = $2, updated_at = NOW() WHERE id = $1 RETURNING *`,
+      [id, status]
     );
     return mapRow(rows[0]);
   }

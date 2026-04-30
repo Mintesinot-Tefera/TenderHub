@@ -42,6 +42,12 @@ export interface BidWithTender extends Bid {
   tenderStatus: string;
 }
 
+export interface BidWithBidder extends Bid {
+  bidderName: string;
+  bidderEmail: string;
+  bidderCompany: string | null;
+}
+
 // Statuses where the bidder can still modify or withdraw
 export const EDITABLE_BID_STATUSES: readonly BidStatus[] = [
   BidStatus.SUBMITTED,

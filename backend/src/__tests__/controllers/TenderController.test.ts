@@ -20,7 +20,11 @@ describe('TenderController', () => {
   beforeEach(() => {
     listTenders = { execute: jest.fn() } as any;
     getTenderById = { execute: jest.fn() } as any;
-    controller = new TenderController(listTenders, getTenderById);
+    const createTender = { execute: jest.fn() } as any;
+    const updateTender = { execute: jest.fn() } as any;
+    const updateTenderStatus = { execute: jest.fn() } as any;
+    const listMyTenders = { execute: jest.fn() } as any;
+    controller = new TenderController(listTenders, getTenderById, createTender, updateTender, updateTenderStatus, listMyTenders);
   });
 
   describe('list', () => {

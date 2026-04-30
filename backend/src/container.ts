@@ -16,11 +16,17 @@ import { GetCurrentUser } from './application/use-cases/auth/GetCurrentUser';
 import { UpdateProfile } from './application/use-cases/auth/UpdateProfile';
 import { ListTenders } from './application/use-cases/tenders/ListTenders';
 import { GetTenderById } from './application/use-cases/tenders/GetTenderById';
+import { CreateTender } from './application/use-cases/tenders/CreateTender';
+import { UpdateTender } from './application/use-cases/tenders/UpdateTender';
+import { UpdateTenderStatus } from './application/use-cases/tenders/UpdateTenderStatus';
+import { ListMyTenders } from './application/use-cases/tenders/ListMyTenders';
 import { ListCategories } from './application/use-cases/categories/ListCategories';
 import { SubmitBid } from './application/use-cases/bids/SubmitBid';
 import { GetMyBids } from './application/use-cases/bids/GetMyBids';
 import { UpdateBid } from './application/use-cases/bids/UpdateBid';
 import { WithdrawBid } from './application/use-cases/bids/WithdrawBid';
+import { GetTenderBids } from './application/use-cases/bids/GetTenderBids';
+import { ReviewBid } from './application/use-cases/bids/ReviewBid';
 import { PostDiscussion } from './application/use-cases/discussions/PostDiscussion';
 import { GetTenderDiscussions } from './application/use-cases/discussions/GetTenderDiscussions';
 
@@ -52,19 +58,25 @@ const getCurrentUser = new GetCurrentUser(userRepo);
 const updateProfile = new UpdateProfile(userRepo);
 const listTenders = new ListTenders(tenderRepo);
 const getTenderById = new GetTenderById(tenderRepo);
+const createTender = new CreateTender(tenderRepo, categoryRepo);
+const updateTender = new UpdateTender(tenderRepo, categoryRepo);
+const updateTenderStatus = new UpdateTenderStatus(tenderRepo);
+const listMyTenders = new ListMyTenders(tenderRepo);
 const listCategories = new ListCategories(categoryRepo);
 const submitBid = new SubmitBid(bidRepo, tenderRepo);
 const getMyBids = new GetMyBids(bidRepo);
 const updateBid = new UpdateBid(bidRepo, tenderRepo);
 const withdrawBid = new WithdrawBid(bidRepo);
+const getTenderBids = new GetTenderBids(bidRepo, tenderRepo);
+const reviewBid = new ReviewBid(bidRepo, tenderRepo);
 const postDiscussion = new PostDiscussion(discussionRepo, tenderRepo);
 const getTenderDiscussions = new GetTenderDiscussions(discussionRepo);
 
 // --- Controllers ---
 export const authController = new AuthController(registerUser, loginUser, getCurrentUser, updateProfile);
-export const tenderController = new TenderController(listTenders, getTenderById);
+export const tenderController = new TenderController(listTenders, getTenderById, createTender, updateTender, updateTenderStatus, listMyTenders);
 export const categoryController = new CategoryController(listCategories);
-export const bidController = new BidController(submitBid, getMyBids, updateBid, withdrawBid);
+export const bidController = new BidController(submitBid, getMyBids, updateBid, withdrawBid, getTenderBids, reviewBid);
 export const discussionController = new DiscussionController(postDiscussion, getTenderDiscussions);
 
 // --- Middlewares ---

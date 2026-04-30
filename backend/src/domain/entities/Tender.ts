@@ -44,3 +44,26 @@ export interface PaginatedTenders {
   limit: number;
   totalPages: number;
 }
+
+export interface CreateTenderProps {
+  title: string;
+  description: string;
+  categoryId: string;
+  organizationId: string;
+  budgetMin?: number | null;
+  budgetMax?: number | null;
+  deadline: Date;
+  location?: string | null;
+  requirements?: string | null;
+}
+
+export interface UpdateTenderProps {
+  title: string;
+  description: string;
+  categoryId: string;
+  budgetMin?: number | null;
+  budgetMax?: number | null;
+  deadline: Date;
+  location?: string | null;
+  requirements?: string | null;
+}

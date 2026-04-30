@@ -8,8 +8,11 @@ import type {
   PaginatedTenders,
   Tender,
   TenderFilters,
+  CreateTenderPayload,
+  UpdateTenderPayload,
   Bid,
   BidWithTender,
+  BidWithBidder,
   DiscussionThread,
   ApiError,
 } from '../types';
@@ -80,6 +83,17 @@ export const tenderApi = {
   },
 
   getById: (id: string) => api.get<Tender>(`/tenders/${id}`).then((r) => r.data),
+
+  myTenders: () => api.get<Tender[]>('/tenders/my').then((r) => r.data),
+
+  create: (data: CreateTenderPayload) =>
+    api.post<Tender>('/tenders', data).then((r) => r.data),
+
+  update: (id: string, data: UpdateTenderPayload) =>
+    api.patch<Tender>(`/tenders/${id}`, data).then((r) => r.data),
+
+  updateStatus: (id: string, action: 'close' | 'cancel') =>
+    api.patch<Tender>(`/tenders/${id}/status`, { action }).then((r) => r.data),
 };
 
 // --- Bids ---
@@ -124,6 +138,12 @@ export const bidApi = {
 
   withdraw: (bidId: string) =>
     api.delete<Bid>(`/bids/${bidId}`).then((r) => r.data),
+
+  getTenderBids: (tenderId: string) =>
+    api.get<BidWithBidder[]>(`/tenders/${tenderId}/bids`).then((r) => r.data),
+
+  review: (bidId: string, action: 'under_review' | 'accept' | 'reject') =>
+    api.patch<Bid>(`/bids/${bidId}/review`, { action }).then((r) => r.data),
 };
 
 // --- Discussions ---

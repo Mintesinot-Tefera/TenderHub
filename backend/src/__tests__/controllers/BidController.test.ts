@@ -26,7 +26,9 @@ describe('BidController', () => {
     getMyBids = { execute: jest.fn() } as any;
     updateBid = { execute: jest.fn() } as any;
     withdrawBid = { execute: jest.fn() } as any;
-    controller = new BidController(submitBid, getMyBids, updateBid, withdrawBid);
+    const getTenderBids = { execute: jest.fn() } as any;
+    const reviewBid = { execute: jest.fn() } as any;
+    controller = new BidController(submitBid, getMyBids, updateBid, withdrawBid, getTenderBids, reviewBid);
   });
 
   describe('submit', () => {
