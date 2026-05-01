@@ -15,6 +15,7 @@ interface AuthContextValue {
     companyName?: string;
     phone?: string;
   }) => Promise<{ message: string }>;
+  googleLogin: (idToken: string, role?: UserRole) => Promise<void>;
   logout: () => void;
   setUser: (user: User) => void;
 }
@@ -51,13 +52,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return result;
   }, []);
 
+  const googleLogin = useCallback(async (idToken: string, role?: UserRole) => {
+    const result = await authApi.googleAuth(idToken, role);
+    tokenStorage.set(result.token);
+    setUser(result.user);
+  }, []);
+
   const logout = useCallback(() => {
     tokenStorage.clear();
     setUser(null);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, setUser }}>
+    <AuthContext.Provider value={{ user, loading, login, register, googleLogin, logout, setUser }}>
       {children}
     </AuthContext.Provider>
   );

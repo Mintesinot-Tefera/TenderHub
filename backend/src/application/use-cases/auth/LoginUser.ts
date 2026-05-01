@@ -18,6 +18,10 @@ export class LoginUser {
       throw new UnauthorizedError('Invalid email or password');
     }
 
+    if (!user.passwordHash) {
+      throw new UnauthorizedError('This account uses Google Sign-In. Please sign in with Google.');
+    }
+
     const valid = await this.hasher.compare(dto.password, user.passwordHash);
     if (!valid) {
       throw new UnauthorizedError('Invalid email or password');

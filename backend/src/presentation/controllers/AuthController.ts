@@ -5,8 +5,10 @@ import { GetCurrentUser } from '../../application/use-cases/auth/GetCurrentUser'
 import { UpdateProfile } from '../../application/use-cases/auth/UpdateProfile';
 import { VerifyEmail } from '../../application/use-cases/auth/VerifyEmail';
 import { ResendVerification } from '../../application/use-cases/auth/ResendVerification';
+import { GoogleAuthUser } from '../../application/use-cases/auth/GoogleAuthUser';
 import { registerSchema, loginSchema, updateProfileSchema } from '../validators/schemas';
 import { z } from 'zod';
+import { UserRole } from '../../domain/entities/User';
 
 export class AuthController {
   constructor(
@@ -15,7 +17,8 @@ export class AuthController {
     private readonly getCurrentUser: GetCurrentUser,
     private readonly updateProfileUC: UpdateProfile,
     private readonly verifyEmailUC: VerifyEmail,
-    private readonly resendVerificationUC: ResendVerification
+    private readonly resendVerificationUC: ResendVerification,
+    private readonly googleAuthUser: GoogleAuthUser
   ) {}
 
   register = async (req: Request, res: Response): Promise<void> => {
@@ -56,6 +59,15 @@ export class AuthController {
   resendVerification = async (req: Request, res: Response): Promise<void> => {
     const { email } = z.object({ email: z.string().email() }).parse(req.body);
     const result = await this.resendVerificationUC.execute(email);
+    res.json(result);
+  };
+
+  googleAuth = async (req: Request, res: Response): Promise<void> => {
+    const { idToken, role } = z.object({
+      idToken: z.string().min(1),
+      role: z.nativeEnum(UserRole).optional(),
+    }).parse(req.body);
+    const result = await this.googleAuthUser.execute({ idToken, role });
     res.json(result);
   };
 }

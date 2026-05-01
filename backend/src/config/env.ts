@@ -22,4 +22,5 @@ export const env = {
   smtpPort: parseInt(process.env.SMTP_PORT || '2525', 10),
   smtpUser: process.env.SMTP_USER || '',
   smtpPass: process.env.SMTP_PASS || '',
+  googleClientId: process.env.GOOGLE_CLIENT_ID || '',
 };

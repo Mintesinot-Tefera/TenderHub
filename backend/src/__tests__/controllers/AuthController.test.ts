@@ -6,6 +6,7 @@ import { GetCurrentUser } from '../../application/use-cases/auth/GetCurrentUser'
 import { UpdateProfile } from '../../application/use-cases/auth/UpdateProfile';
 import { VerifyEmail } from '../../application/use-cases/auth/VerifyEmail';
 import { ResendVerification } from '../../application/use-cases/auth/ResendVerification';
+import { GoogleAuthUser } from '../../application/use-cases/auth/GoogleAuthUser';
 import { UserRole } from '../../domain/entities/User';
 
 const mockRes = () => {
@@ -23,6 +24,7 @@ describe('AuthController', () => {
   let updateProfile: jest.Mocked<UpdateProfile>;
   let verifyEmail: jest.Mocked<VerifyEmail>;
   let resendVerification: jest.Mocked<ResendVerification>;
+  let googleAuthUser: jest.Mocked<GoogleAuthUser>;
   let controller: AuthController;
 
   beforeEach(() => {
@@ -32,7 +34,8 @@ describe('AuthController', () => {
     updateProfile = { execute: jest.fn() } as any;
     verifyEmail = { execute: jest.fn() } as any;
     resendVerification = { execute: jest.fn() } as any;
-    controller = new AuthController(registerUser, loginUser, getCurrentUser, updateProfile, verifyEmail, resendVerification);
+    googleAuthUser = { execute: jest.fn() } as any;
+    controller = new AuthController(registerUser, loginUser, getCurrentUser, updateProfile, verifyEmail, resendVerification, googleAuthUser);
   });
 
   describe('register', () => {

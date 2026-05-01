@@ -5,7 +5,7 @@ import { User, CreateUserProps, UpdateUserProps, UserRole } from '../../domain/e
 interface UserRow {
   id: string;
   email: string;
-  password_hash: string;
+  password_hash: string | null;
   full_name: string;
   role: string;
   company_name: string | null;
@@ -13,6 +13,7 @@ interface UserRow {
   avatar_url: string | null;
   email_verified: boolean;
   verification_token: string | null;
+  google_id: string | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -28,6 +29,7 @@ const mapRow = (r: UserRow): User => ({
   avatarUrl: r.avatar_url,
   emailVerified: r.email_verified,
   verificationToken: r.verification_token,
+  googleId: r.google_id,
   createdAt: r.created_at,
   updatedAt: r.updated_at,
 });
@@ -61,8 +63,8 @@ export class PgUserRepository implements IUserRepository {
 
   async create(props: CreateUserProps): Promise<User> {
     const { rows } = await this.pool.query<UserRow>(
-      `INSERT INTO users (email, password_hash, full_name, role, company_name, phone, avatar_url, email_verified, verification_token)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `INSERT INTO users (email, password_hash, full_name, role, company_name, phone, avatar_url, email_verified, verification_token, google_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        RETURNING *`,
       [
         props.email,
@@ -74,6 +76,7 @@ export class PgUserRepository implements IUserRepository {
         props.avatarUrl,
         props.emailVerified,
         props.verificationToken,
+        props.googleId,
       ]
     );
     return mapRow(rows[0]);
@@ -102,6 +105,21 @@ export class PgUserRepository implements IUserRepository {
     await this.pool.query(
       `UPDATE users SET verification_token = $1, updated_at = NOW() WHERE id = $2`,
       [token, userId]
+    );
+  }
+
+  async findByGoogleId(googleId: string): Promise<User | null> {
+    const { rows } = await this.pool.query<UserRow>(
+      'SELECT * FROM users WHERE google_id = $1',
+      [googleId]
+    );
+    return rows[0] ? mapRow(rows[0]) : null;
+  }
+
+  async linkGoogleId(userId: string, googleId: string): Promise<void> {
+    await this.pool.query(
+      `UPDATE users SET google_id = $1, updated_at = NOW() WHERE id = $2`,
+      [googleId, userId]
     );
   }
 }

@@ -30,6 +30,7 @@ services:
       SMTP_PORT: 587
       SMTP_USER: mintesinottefera26@gmail.com
       SMTP_PASS: "glec gptz vazq yfhb"
+      GOOGLE_CLIENT_ID: 790434189898-fne24sgr9lihk0qs7ork0s6snqurenfj.apps.googleusercontent.com
 
     ports:
       - "5000:5000"
@@ -46,6 +47,7 @@ services:
       args:
         # Baked at build time — browser calls backend directly on host port
         VITE_API_URL: http://localhost:5000/api
+        VITE_GOOGLE_CLIENT_ID: 790434189898-fne24sgr9lihk0qs7ork0s6snqurenfj.apps.googleusercontent.com
     ports:
       - "5173:80"
     depends_on:

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Briefcase, AlertCircle } from 'lucide-react';
+import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 import { getErrorMessage, authApi } from '../services/api';
 import { Spinner } from '../components/Spinner';
@@ -9,7 +10,7 @@ import axios from 'axios';
 import type { ApiError } from '../types';
 
 export function LoginPage() {
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -143,6 +144,31 @@ export function LoginPage() {
               Create one
             </Link>
           </p>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-200" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="bg-white px-3 text-slate-500">or continue with</span>
+              </div>
+            </div>
+            <div className="mt-4 flex justify-center">
+              <GoogleLogin
+                onSuccess={(credentialResponse) => {
+                  if (credentialResponse.credential) {
+                    setLoading(true);
+                    googleLogin(credentialResponse.credential)
+                      .then(() => navigate(from, { replace: true }))
+                      .catch((err) => setError(getErrorMessage(err)))
+                      .finally(() => setLoading(false));
+                  }
+                }}
+                onError={() => setError('Google sign-in failed. Please try again.')}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>

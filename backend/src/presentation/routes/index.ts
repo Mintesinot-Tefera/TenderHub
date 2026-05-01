@@ -19,6 +19,7 @@ router.post('/auth/register', asyncHandler(authController.register));
 router.post('/auth/login', asyncHandler(authController.login));
 router.get('/auth/verify-email', asyncHandler(authController.verifyEmail));
 router.post('/auth/resend-verification', asyncHandler(authController.resendVerification));
+router.post('/auth/google', asyncHandler(authController.googleAuth));
 router.get('/auth/me', authMiddleware, asyncHandler(authController.me));
 router.patch('/auth/profile', authMiddleware, asyncHandler(authController.updateProfile));
 

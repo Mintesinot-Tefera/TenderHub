@@ -36,6 +36,7 @@ export class RegisterUser {
       avatarUrl: null,
       emailVerified: false,
       verificationToken,
+      googleId: null,
     });
 
     // Fire-and-forget — SMTP failures must not block account creation.

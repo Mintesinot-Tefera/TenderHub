@@ -13,6 +13,7 @@ const makeUser = (): User => ({
   avatarUrl: null,
   emailVerified: true,
   verificationToken: null,
+  googleId: null,
   createdAt: new Date(),
   updatedAt: new Date(),
 });
@@ -30,6 +31,8 @@ describe('GetCurrentUser', () => {
       update: jest.fn(),
       verifyEmail: jest.fn(),
       setVerificationToken: jest.fn(),
+      findByGoogleId: jest.fn(),
+      linkGoogleId: jest.fn(),
     };
     useCase = new GetCurrentUser(userRepo);
   });

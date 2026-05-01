@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Briefcase, AlertCircle, MailCheck } from 'lucide-react';
+import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 import { getErrorMessage } from '../services/api';
 import { Spinner } from '../components/Spinner';
 import type { UserRole } from '../types';
 
 export function RegisterPage() {
-  const { register } = useAuth();
+  const { register, googleLogin } = useAuth();
+  const navigate = useNavigate();
 
   const [form, setForm] = useState({
     fullName: '',
@@ -209,6 +211,35 @@ export function RegisterPage() {
               Sign in
             </Link>
           </p>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-200" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="bg-white px-3 text-slate-500">or sign up with Google</span>
+              </div>
+            </div>
+            <p className="mt-3 text-center text-xs text-slate-500">
+              Role selected above ({form.role === 'ORGANIZATION' ? 'Organization' : 'Bidder'}) will apply
+            </p>
+            <div className="mt-2 flex justify-center">
+              <GoogleLogin
+                onSuccess={(credentialResponse) => {
+                  if (credentialResponse.credential) {
+                    setLoading(true);
+                    googleLogin(credentialResponse.credential, form.role)
+                      .then(() => navigate('/', { replace: true }))
+                      .catch((err) => setError(getErrorMessage(err)))
+                      .finally(() => setLoading(false));
+                  }
+                }}
+                onError={() => setError('Google sign-up failed. Please try again.')}
+                text="signup_with"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>

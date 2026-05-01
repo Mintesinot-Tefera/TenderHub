@@ -13,6 +13,7 @@ const makeUser = (overrides: Partial<User> = {}): User => ({
   avatarUrl: null,
   emailVerified: true,
   verificationToken: null,
+  googleId: null,
   createdAt: new Date(),
   updatedAt: new Date(),
   ...overrides,
@@ -31,6 +32,8 @@ describe('UpdateProfile', () => {
       update: jest.fn(),
       verifyEmail: jest.fn(),
       setVerificationToken: jest.fn(),
+      findByGoogleId: jest.fn(),
+      linkGoogleId: jest.fn(),
     };
     useCase = new UpdateProfile(userRepo);
   });

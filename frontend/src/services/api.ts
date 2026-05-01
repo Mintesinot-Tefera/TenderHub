@@ -69,6 +69,9 @@ export const authApi = {
 
   resendVerification: (email: string) =>
     api.post<{ message: string }>('/auth/resend-verification', { email }).then((r) => r.data),
+
+  googleAuth: (idToken: string, role?: UserRole) =>
+    api.post<AuthResult>('/auth/google', { idToken, role }).then((r) => r.data),
 };
 
 // --- Categories ---

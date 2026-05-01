@@ -20,6 +20,12 @@ async function migrate() {
     await client.query(
       'ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token VARCHAR(255)'
     );
+    await client.query(
+      'ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL'
+    );
+    await client.query(
+      'ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id VARCHAR(255) UNIQUE'
+    );
     console.log('✓ Database schema applied successfully');
   } finally {
     client.release();

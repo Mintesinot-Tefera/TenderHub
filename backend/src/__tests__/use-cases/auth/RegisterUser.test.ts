@@ -15,6 +15,7 @@ const makeUser = (overrides: Partial<User> = {}): User => ({
   avatarUrl: null,
   emailVerified: false,
   verificationToken: 'some-token',
+  googleId: null,
   createdAt: new Date(),
   updatedAt: new Date(),
   ...overrides,
@@ -35,6 +36,8 @@ describe('RegisterUser', () => {
       update: jest.fn(),
       verifyEmail: jest.fn(),
       setVerificationToken: jest.fn(),
+      findByGoogleId: jest.fn(),
+      linkGoogleId: jest.fn(),
     };
     hasher = {
       hash: jest.fn(),

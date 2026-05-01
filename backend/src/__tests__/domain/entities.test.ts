@@ -14,6 +14,7 @@ describe('User entity', () => {
     avatarUrl: null,
     emailVerified: true,
     verificationToken: null,
+    googleId: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   };

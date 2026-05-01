@@ -7,7 +7,7 @@ export enum UserRole {
 export interface User {
   id: string;
   email: string;
-  passwordHash: string;
+  passwordHash: string | null;
   fullName: string;
   role: UserRole;
   companyName: string | null;
@@ -15,6 +15,7 @@ export interface User {
   avatarUrl: string | null;
   emailVerified: boolean;
   verificationToken: string | null;
+  googleId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -29,9 +30,9 @@ export type UpdateUserProps = {
   avatarUrl: string | null;
 };
 
-export type PublicUser = Omit<User, 'passwordHash'>;
+export type PublicUser = Omit<User, 'passwordHash' | 'googleId'>;
 
 export const toPublicUser = (user: User): PublicUser => {
-  const { passwordHash, ...rest } = user;
+  const { passwordHash, googleId, ...rest } = user;
   return rest;
 };

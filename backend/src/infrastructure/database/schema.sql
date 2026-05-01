@@ -5,7 +5,7 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email VARCHAR(255) UNIQUE NOT NULL,
-  password_hash VARCHAR(255) NOT NULL,
+  password_hash VARCHAR(255),
   full_name VARCHAR(255) NOT NULL,
   role VARCHAR(20) NOT NULL CHECK (role IN ('ADMIN', 'ORGANIZATION', 'BIDDER')),
   company_name VARCHAR(255),
@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS users (
   avatar_url TEXT,
   email_verified BOOLEAN NOT NULL DEFAULT FALSE,
   verification_token VARCHAR(255),
+  google_id VARCHAR(255) UNIQUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

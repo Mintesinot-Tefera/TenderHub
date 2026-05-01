@@ -7,8 +7,11 @@ WORKDIR /app
 ARG VITE_API_URL=http://localhost:5000/api
 ENV VITE_API_URL=${VITE_API_URL}
 
+ARG VITE_GOOGLE_CLIENT_ID=
+ENV VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
+
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
 COPY . .
 RUN npm run build
