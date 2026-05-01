@@ -25,11 +25,12 @@ services:
       # Browser origin for CORS — must match where frontend is exposed on host
       CORS_ORIGIN: http://localhost:5173
       FRONTEND_URL: http://localhost:5173
-      # Mailtrap SMTP credentials (Email Testing sandbox)
-      SMTP_HOST: sandbox.smtp.mailtrap.io
-      SMTP_PORT: 2525
-      SMTP_USER: 60913854e91532
-      SMTP_PASS: 38f2066d7bc43b
+      # Gmail SMTP — use an App Password, NOT your Gmail login password
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: 587
+      SMTP_USER: mintesinottefera26@gmail.com
+      SMTP_PASS: "glec gptz vazq yfhb"
+
     ports:
       - "5000:5000"
     volumes:
