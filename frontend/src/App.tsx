@@ -12,6 +12,7 @@ import { ProfilePage } from './pages/ProfilePage';
 import { OrgTendersPage } from './pages/OrgTendersPage';
 import { TenderFormPage } from './pages/TenderFormPage';
 import { OrgTenderBidsPage } from './pages/OrgTenderBidsPage';
+import { VerifyEmailPage } from './pages/VerifyEmailPage';
 import type { UserRole } from './types';
 
 function Layout() {
@@ -51,6 +52,7 @@ function AppRoutes() {
       <Route element={<GuestRoute />}>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
       </Route>
 
       <Route element={<Layout />}>

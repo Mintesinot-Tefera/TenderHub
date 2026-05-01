@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Briefcase, AlertCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Briefcase, AlertCircle, MailCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getErrorMessage } from '../services/api';
 import { Spinner } from '../components/Spinner';
@@ -9,7 +9,6 @@ import type { UserRole } from '../types';
 
 export function RegisterPage() {
   const { register } = useAuth();
-  const navigate = useNavigate();
 
   const [form, setForm] = useState({
     fullName: '',
@@ -21,6 +20,7 @@ export function RegisterPage() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [successEmail, setSuccessEmail] = useState('');
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -41,12 +41,37 @@ export function RegisterPage() {
         companyName: form.companyName || undefined,
         phone: form.phone || undefined,
       });
-      navigate('/', { replace: true });
+      setSuccessEmail(form.email);
     } catch (err) {
       setError(getErrorMessage(err));
       setLoading(false);
     }
   };
+
+  if (successEmail) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 px-4 py-12">
+        <div className="w-full max-w-md text-center">
+          <div className="mb-6 flex justify-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+              <MailCheck className="h-8 w-8 text-green-600" />
+            </div>
+          </div>
+          <h1 className="mb-2 text-2xl font-bold text-slate-900">Check your inbox</h1>
+          <p className="mb-1 text-slate-600">
+            We've sent a verification link to
+          </p>
+          <p className="mb-6 font-semibold text-slate-900">{successEmail}</p>
+          <p className="mb-6 text-sm text-slate-500">
+            Click the link in the email to activate your account. Check your spam folder if you don't see it.
+          </p>
+          <Link to="/login" className="btn-primary">
+            Go to Login
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 px-4 py-12">

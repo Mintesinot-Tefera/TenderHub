@@ -14,6 +14,12 @@ async function migrate() {
     await client.query(
       'ALTER TABLE bids ADD COLUMN IF NOT EXISTS document_url TEXT'
     );
+    await client.query(
+      'ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT FALSE'
+    );
+    await client.query(
+      'ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token VARCHAR(255)'
+    );
     console.log('✓ Database schema applied successfully');
   } finally {
     client.release();

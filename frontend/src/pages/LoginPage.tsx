@@ -3,8 +3,10 @@ import type { FormEvent } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Briefcase, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { getErrorMessage } from '../services/api';
+import { getErrorMessage, authApi } from '../services/api';
 import { Spinner } from '../components/Spinner';
+import axios from 'axios';
+import type { ApiError } from '../types';
 
 export function LoginPage() {
   const { login } = useAuth();
@@ -14,6 +16,9 @@ export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [emailNotVerified, setEmailNotVerified] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendMessage, setResendMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
   const from = (location.state as { from?: string })?.from || '/';
@@ -21,13 +26,36 @@ export function LoginPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
+    setEmailNotVerified(false);
+    setResendMessage('');
     setLoading(true);
     try {
       await login(email, password);
       navigate(from, { replace: true });
     } catch (err) {
+      if (axios.isAxiosError(err)) {
+        const code = (err.response?.data as ApiError)?.error?.code;
+        if (code === 'EMAIL_NOT_VERIFIED') {
+          setEmailNotVerified(true);
+          setLoading(false);
+          return;
+        }
+      }
       setError(getErrorMessage(err));
       setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setResendLoading(true);
+    setResendMessage('');
+    try {
+      await authApi.resendVerification(email);
+      setResendMessage('Verification email resent. Please check your inbox.');
+    } catch {
+      setResendMessage('Failed to resend. Please try again.');
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -50,6 +78,24 @@ export function LoginPage() {
             <div className="mb-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
               <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
               <span>{error}</span>
+            </div>
+          )}
+
+          {emailNotVerified && (
+            <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+              <p className="font-medium">Email not verified</p>
+              <p className="mt-1">Please check your inbox and click the verification link.</p>
+              {resendMessage ? (
+                <p className="mt-2 text-green-700">{resendMessage}</p>
+              ) : (
+                <button
+                  onClick={handleResend}
+                  disabled={resendLoading}
+                  className="mt-2 font-medium text-amber-700 underline hover:text-amber-900 disabled:opacity-50"
+                >
+                  {resendLoading ? 'Sending…' : 'Resend verification email'}
+                </button>
+              )}
             </div>
           )}
 

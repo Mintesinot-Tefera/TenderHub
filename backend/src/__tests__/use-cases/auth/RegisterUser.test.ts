@@ -1,7 +1,7 @@
 import { RegisterUser } from '../../../application/use-cases/auth/RegisterUser';
 import { IUserRepository } from '../../../domain/repositories/IUserRepository';
 import { IPasswordHasher } from '../../../application/services/IPasswordHasher';
-import { ITokenService } from '../../../application/services/ITokenService';
+import { IEmailService } from '../../../application/services/IEmailService';
 import { UserRole, User } from '../../../domain/entities/User';
 
 const makeUser = (overrides: Partial<User> = {}): User => ({
@@ -13,6 +13,8 @@ const makeUser = (overrides: Partial<User> = {}): User => ({
   companyName: null,
   phone: null,
   avatarUrl: null,
+  emailVerified: false,
+  verificationToken: 'some-token',
   createdAt: new Date(),
   updatedAt: new Date(),
   ...overrides,
@@ -21,25 +23,27 @@ const makeUser = (overrides: Partial<User> = {}): User => ({
 describe('RegisterUser', () => {
   let userRepo: jest.Mocked<IUserRepository>;
   let hasher: jest.Mocked<IPasswordHasher>;
-  let tokenService: jest.Mocked<ITokenService>;
+  let emailService: jest.Mocked<IEmailService>;
   let useCase: RegisterUser;
 
   beforeEach(() => {
     userRepo = {
       findById: jest.fn(),
       findByEmail: jest.fn(),
+      findByVerificationToken: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
+      verifyEmail: jest.fn(),
+      setVerificationToken: jest.fn(),
     };
     hasher = {
       hash: jest.fn(),
       compare: jest.fn(),
     };
-    tokenService = {
-      sign: jest.fn(),
-      verify: jest.fn(),
+    emailService = {
+      sendVerificationEmail: jest.fn(),
     };
-    useCase = new RegisterUser(userRepo, hasher, tokenService);
+    useCase = new RegisterUser(userRepo, hasher, emailService);
   });
 
   it('rejects admin self-registration', async () => {
@@ -71,7 +75,7 @@ describe('RegisterUser', () => {
     hasher.hash.mockResolvedValue('hashed_pw');
     const createdUser = makeUser({ email: 'new@example.com' });
     userRepo.create.mockResolvedValue(createdUser);
-    tokenService.sign.mockReturnValue('jwt_token');
+    emailService.sendVerificationEmail.mockResolvedValue();
 
     const result = await useCase.execute({
       email: 'New@Example.com',
@@ -89,15 +93,18 @@ describe('RegisterUser', () => {
         role: UserRole.BIDDER,
       })
     );
-    expect(result.token).toBe('jwt_token');
-    expect(result.user).not.toHaveProperty('passwordHash');
+    expect(emailService.sendVerificationEmail).toHaveBeenCalledWith(
+      'new@example.com',
+      expect.any(String)
+    );
+    expect(result.message).toBeDefined();
   });
 
   it('normalizes email to lowercase', async () => {
     userRepo.findByEmail.mockResolvedValue(null);
     hasher.hash.mockResolvedValue('hashed');
     userRepo.create.mockResolvedValue(makeUser());
-    tokenService.sign.mockReturnValue('token');
+    emailService.sendVerificationEmail.mockResolvedValue();
 
     await useCase.execute({
       email: 'UPPER@TEST.COM',
@@ -116,7 +123,7 @@ describe('RegisterUser', () => {
     userRepo.findByEmail.mockResolvedValue(null);
     hasher.hash.mockResolvedValue('hashed');
     userRepo.create.mockResolvedValue(makeUser());
-    tokenService.sign.mockReturnValue('token');
+    emailService.sendVerificationEmail.mockResolvedValue();
 
     await useCase.execute({
       email: 'org@test.com',

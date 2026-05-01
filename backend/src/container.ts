@@ -8,12 +8,15 @@ import { PgBidRepository } from './infrastructure/repositories/PgBidRepository';
 import { PgDiscussionRepository } from './infrastructure/repositories/PgDiscussionRepository';
 import { BcryptPasswordHasher } from './infrastructure/auth/BcryptPasswordHasher';
 import { JwtTokenService } from './infrastructure/auth/JwtTokenService';
+import { NodemailerEmailService } from './infrastructure/auth/NodemailerEmailService';
 
 // Use cases
 import { RegisterUser } from './application/use-cases/auth/RegisterUser';
 import { LoginUser } from './application/use-cases/auth/LoginUser';
 import { GetCurrentUser } from './application/use-cases/auth/GetCurrentUser';
 import { UpdateProfile } from './application/use-cases/auth/UpdateProfile';
+import { VerifyEmail } from './application/use-cases/auth/VerifyEmail';
+import { ResendVerification } from './application/use-cases/auth/ResendVerification';
 import { ListTenders } from './application/use-cases/tenders/ListTenders';
 import { GetTenderById } from './application/use-cases/tenders/GetTenderById';
 import { CreateTender } from './application/use-cases/tenders/CreateTender';
@@ -50,12 +53,15 @@ const discussionRepo = new PgDiscussionRepository(pool);
 // --- Services ---
 const hasher = new BcryptPasswordHasher();
 const tokenService = new JwtTokenService();
+const emailService = new NodemailerEmailService();
 
 // --- Use cases ---
-const registerUser = new RegisterUser(userRepo, hasher, tokenService);
+const registerUser = new RegisterUser(userRepo, hasher, emailService);
 const loginUser = new LoginUser(userRepo, hasher, tokenService);
 const getCurrentUser = new GetCurrentUser(userRepo);
 const updateProfile = new UpdateProfile(userRepo);
+const verifyEmail = new VerifyEmail(userRepo, tokenService);
+const resendVerification = new ResendVerification(userRepo, emailService);
 const listTenders = new ListTenders(tenderRepo);
 const getTenderById = new GetTenderById(tenderRepo);
 const createTender = new CreateTender(tenderRepo, categoryRepo);
@@ -73,7 +79,7 @@ const postDiscussion = new PostDiscussion(discussionRepo, tenderRepo);
 const getTenderDiscussions = new GetTenderDiscussions(discussionRepo);
 
 // --- Controllers ---
-export const authController = new AuthController(registerUser, loginUser, getCurrentUser, updateProfile);
+export const authController = new AuthController(registerUser, loginUser, getCurrentUser, updateProfile, verifyEmail, resendVerification);
 export const tenderController = new TenderController(listTenders, getTenderById, createTender, updateTender, updateTenderStatus, listMyTenders);
 export const categoryController = new CategoryController(listCategories);
 export const bidController = new BidController(submitBid, getMyBids, updateBid, withdrawBid, getTenderBids, reviewBid);

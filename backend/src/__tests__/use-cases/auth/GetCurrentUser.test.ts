@@ -11,6 +11,8 @@ const makeUser = (): User => ({
   companyName: null,
   phone: null,
   avatarUrl: null,
+  emailVerified: true,
+  verificationToken: null,
   createdAt: new Date(),
   updatedAt: new Date(),
 });
@@ -23,8 +25,11 @@ describe('GetCurrentUser', () => {
     userRepo = {
       findById: jest.fn(),
       findByEmail: jest.fn(),
+      findByVerificationToken: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
+      verifyEmail: jest.fn(),
+      setVerificationToken: jest.fn(),
     };
     useCase = new GetCurrentUser(userRepo);
   });

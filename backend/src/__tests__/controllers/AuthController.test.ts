@@ -4,6 +4,8 @@ import { RegisterUser } from '../../application/use-cases/auth/RegisterUser';
 import { LoginUser } from '../../application/use-cases/auth/LoginUser';
 import { GetCurrentUser } from '../../application/use-cases/auth/GetCurrentUser';
 import { UpdateProfile } from '../../application/use-cases/auth/UpdateProfile';
+import { VerifyEmail } from '../../application/use-cases/auth/VerifyEmail';
+import { ResendVerification } from '../../application/use-cases/auth/ResendVerification';
 import { UserRole } from '../../domain/entities/User';
 
 const mockRes = () => {
@@ -19,6 +21,8 @@ describe('AuthController', () => {
   let loginUser: jest.Mocked<LoginUser>;
   let getCurrentUser: jest.Mocked<GetCurrentUser>;
   let updateProfile: jest.Mocked<UpdateProfile>;
+  let verifyEmail: jest.Mocked<VerifyEmail>;
+  let resendVerification: jest.Mocked<ResendVerification>;
   let controller: AuthController;
 
   beforeEach(() => {
@@ -26,16 +30,15 @@ describe('AuthController', () => {
     loginUser = { execute: jest.fn() } as any;
     getCurrentUser = { execute: jest.fn() } as any;
     updateProfile = { execute: jest.fn() } as any;
-    controller = new AuthController(registerUser, loginUser, getCurrentUser, updateProfile);
+    verifyEmail = { execute: jest.fn() } as any;
+    resendVerification = { execute: jest.fn() } as any;
+    controller = new AuthController(registerUser, loginUser, getCurrentUser, updateProfile, verifyEmail, resendVerification);
   });
 
   describe('register', () => {
-    it('returns 201 with auth result', async () => {
-      const authResult = {
-        user: { id: 'u1', email: 'test@test.com', fullName: 'Test', role: UserRole.BIDDER },
-        token: 'jwt',
-      };
-      registerUser.execute.mockResolvedValue(authResult as any);
+    it('returns 201 with message', async () => {
+      const result = { message: 'Registration successful. Please check your email to verify your account.' };
+      registerUser.execute.mockResolvedValue(result as any);
 
       const req = {
         body: {
@@ -50,7 +53,7 @@ describe('AuthController', () => {
       await controller.register(req, res);
 
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith(authResult);
+      expect(res.json).toHaveBeenCalledWith(result);
     });
   });
 

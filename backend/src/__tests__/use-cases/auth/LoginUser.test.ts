@@ -13,6 +13,8 @@ const makeUser = (overrides: Partial<User> = {}): User => ({
   companyName: null,
   phone: null,
   avatarUrl: null,
+  emailVerified: true,
+  verificationToken: null,
   createdAt: new Date(),
   updatedAt: new Date(),
   ...overrides,
@@ -28,8 +30,11 @@ describe('LoginUser', () => {
     userRepo = {
       findById: jest.fn(),
       findByEmail: jest.fn(),
+      findByVerificationToken: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
+      verifyEmail: jest.fn(),
+      setVerificationToken: jest.fn(),
     };
     hasher = { hash: jest.fn(), compare: jest.fn() };
     tokenService = { sign: jest.fn(), verify: jest.fn() };
@@ -51,6 +56,16 @@ describe('LoginUser', () => {
     await expect(
       useCase.execute({ email: 'user@test.com', password: 'wrong' })
     ).rejects.toMatchObject({ statusCode: 401, code: 'UNAUTHORIZED' });
+  });
+
+  it('throws 403 when email is not verified', async () => {
+    const user = makeUser({ emailVerified: false });
+    userRepo.findByEmail.mockResolvedValue(user);
+    hasher.compare.mockResolvedValue(true);
+
+    await expect(
+      useCase.execute({ email: 'user@test.com', password: 'correct' })
+    ).rejects.toMatchObject({ statusCode: 403, code: 'EMAIL_NOT_VERIFIED' });
   });
 
   it('returns token and public user on success', async () => {

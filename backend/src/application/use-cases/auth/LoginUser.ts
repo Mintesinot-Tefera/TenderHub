@@ -2,7 +2,7 @@ import { IUserRepository } from '../../../domain/repositories/IUserRepository';
 import { IPasswordHasher } from '../../services/IPasswordHasher';
 import { ITokenService } from '../../services/ITokenService';
 import { LoginDTO, AuthResultDTO } from '../../dtos/AuthDTO';
-import { UnauthorizedError } from '../../../domain/errors/AppError';
+import { UnauthorizedError, EmailNotVerifiedError } from '../../../domain/errors/AppError';
 import { toPublicUser } from '../../../domain/entities/User';
 
 export class LoginUser {
@@ -21,6 +21,10 @@ export class LoginUser {
     const valid = await this.hasher.compare(dto.password, user.passwordHash);
     if (!valid) {
       throw new UnauthorizedError('Invalid email or password');
+    }
+
+    if (!user.emailVerified) {
+      throw new EmailNotVerifiedError();
     }
 
     const token = this.tokenService.sign({

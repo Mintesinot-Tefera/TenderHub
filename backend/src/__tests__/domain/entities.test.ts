@@ -12,6 +12,8 @@ describe('User entity', () => {
     companyName: null,
     phone: null,
     avatarUrl: null,
+    emailVerified: true,
+    verificationToken: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   };

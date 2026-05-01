@@ -54,7 +54,7 @@ export const authApi = {
     role: UserRole;
     companyName?: string;
     phone?: string;
-  }) => api.post<AuthResult>('/auth/register', data).then((r) => r.data),
+  }) => api.post<{ message: string }>('/auth/register', data).then((r) => r.data),
 
   login: (data: { email: string; password: string }) =>
     api.post<AuthResult>('/auth/login', data).then((r) => r.data),
@@ -63,6 +63,12 @@ export const authApi = {
 
   updateProfile: (data: UpdateProfilePayload) =>
     api.patch<User>('/auth/profile', data).then((r) => r.data),
+
+  verifyEmail: (token: string) =>
+    api.get<AuthResult>('/auth/verify-email', { params: { token } }).then((r) => r.data),
+
+  resendVerification: (email: string) =>
+    api.post<{ message: string }>('/auth/resend-verification', { email }).then((r) => r.data),
 };
 
 // --- Categories ---

@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS users (
   company_name VARCHAR(255),
   phone VARCHAR(50),
   avatar_url TEXT,
+  email_verified BOOLEAN NOT NULL DEFAULT FALSE,
+  verification_token VARCHAR(255),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

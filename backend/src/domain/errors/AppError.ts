@@ -39,3 +39,9 @@ export class ValidationError extends AppError {
     super(message, 400, 'VALIDATION_ERROR');
   }
 }
+
+export class EmailNotVerifiedError extends AppError {
+  constructor() {
+    super('Please verify your email address before logging in', 403, 'EMAIL_NOT_VERIFIED');
+  }
+}

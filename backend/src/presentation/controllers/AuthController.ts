@@ -3,14 +3,19 @@ import { RegisterUser } from '../../application/use-cases/auth/RegisterUser';
 import { LoginUser } from '../../application/use-cases/auth/LoginUser';
 import { GetCurrentUser } from '../../application/use-cases/auth/GetCurrentUser';
 import { UpdateProfile } from '../../application/use-cases/auth/UpdateProfile';
+import { VerifyEmail } from '../../application/use-cases/auth/VerifyEmail';
+import { ResendVerification } from '../../application/use-cases/auth/ResendVerification';
 import { registerSchema, loginSchema, updateProfileSchema } from '../validators/schemas';
+import { z } from 'zod';
 
 export class AuthController {
   constructor(
     private readonly registerUser: RegisterUser,
     private readonly loginUser: LoginUser,
     private readonly getCurrentUser: GetCurrentUser,
-    private readonly updateProfileUC: UpdateProfile
+    private readonly updateProfileUC: UpdateProfile,
+    private readonly verifyEmailUC: VerifyEmail,
+    private readonly resendVerificationUC: ResendVerification
   ) {}
 
   register = async (req: Request, res: Response): Promise<void> => {
@@ -40,5 +45,17 @@ export class AuthController {
       avatarUrl: body.avatarUrl,
     });
     res.json(user);
+  };
+
+  verifyEmail = async (req: Request, res: Response): Promise<void> => {
+    const { token } = z.object({ token: z.string().min(1) }).parse(req.query);
+    const result = await this.verifyEmailUC.execute(token);
+    res.json(result);
+  };
+
+  resendVerification = async (req: Request, res: Response): Promise<void> => {
+    const { email } = z.object({ email: z.string().email() }).parse(req.body);
+    const result = await this.resendVerificationUC.execute(email);
+    res.json(result);
   };
 }

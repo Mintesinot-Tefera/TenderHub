@@ -13,11 +13,14 @@ export interface User {
   companyName: string | null;
   phone: string | null;
   avatarUrl: string | null;
+  emailVerified: boolean;
+  verificationToken: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export type CreateUserProps = Omit<User, 'id' | 'createdAt' | 'updatedAt'>;
+
 
 export type UpdateUserProps = {
   fullName: string;

@@ -1,18 +1,19 @@
+import crypto from 'crypto';
 import { IUserRepository } from '../../../domain/repositories/IUserRepository';
 import { IPasswordHasher } from '../../services/IPasswordHasher';
-import { ITokenService } from '../../services/ITokenService';
-import { RegisterDTO, AuthResultDTO } from '../../dtos/AuthDTO';
+import { IEmailService } from '../../services/IEmailService';
+import { RegisterDTO } from '../../dtos/AuthDTO';
 import { ConflictError, ValidationError } from '../../../domain/errors/AppError';
-import { UserRole, toPublicUser } from '../../../domain/entities/User';
+import { UserRole } from '../../../domain/entities/User';
 
 export class RegisterUser {
   constructor(
     private readonly userRepo: IUserRepository,
     private readonly hasher: IPasswordHasher,
-    private readonly tokenService: ITokenService
+    private readonly emailService: IEmailService
   ) {}
 
-  async execute(dto: RegisterDTO): Promise<AuthResultDTO> {
+  async execute(dto: RegisterDTO): Promise<{ message: string }> {
     if (dto.role === UserRole.ADMIN) {
       throw new ValidationError('Cannot self-register as admin');
     }
@@ -23,8 +24,9 @@ export class RegisterUser {
     }
 
     const passwordHash = await this.hasher.hash(dto.password);
+    const verificationToken = crypto.randomUUID();
 
-    const user = await this.userRepo.create({
+    await this.userRepo.create({
       email: dto.email.toLowerCase(),
       passwordHash,
       fullName: dto.fullName,
@@ -32,14 +34,15 @@ export class RegisterUser {
       companyName: dto.companyName ?? null,
       phone: dto.phone ?? null,
       avatarUrl: null,
+      emailVerified: false,
+      verificationToken,
     });
 
-    const token = this.tokenService.sign({
-      userId: user.id,
-      email: user.email,
-      role: user.role,
-    });
+    // Fire-and-forget — SMTP failures must not block account creation.
+    // The user can request a resend from the login page if the email doesn't arrive.
+    this.emailService.sendVerificationEmail(dto.email.toLowerCase(), verificationToken)
+      .catch((err) => console.error('[RegisterUser] Failed to send verification email:', err));
 
-    return { user: toPublicUser(user), token };
+    return { message: 'Registration successful. Please check your email to verify your account.' };
   }
 }

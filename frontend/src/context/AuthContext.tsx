@@ -14,7 +14,7 @@ interface AuthContextValue {
     role: UserRole;
     companyName?: string;
     phone?: string;
-  }) => Promise<void>;
+  }) => Promise<{ message: string }>;
   logout: () => void;
   setUser: (user: User) => void;
 }
@@ -48,8 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = useCallback(async (data: Parameters<typeof authApi.register>[0]) => {
     const result = await authApi.register(data);
-    tokenStorage.set(result.token);
-    setUser(result.user);
+    return result;
   }, []);
 
   const logout = useCallback(() => {

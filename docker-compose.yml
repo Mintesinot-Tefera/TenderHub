@@ -24,6 +24,12 @@ services:
       JWT_EXPIRES_IN: 7d
       # Browser origin for CORS — must match where frontend is exposed on host
       CORS_ORIGIN: http://localhost:5173
+      FRONTEND_URL: http://localhost:5173
+      # Mailtrap SMTP credentials (Email Testing sandbox)
+      SMTP_HOST: sandbox.smtp.mailtrap.io
+      SMTP_PORT: 2525
+      SMTP_USER: 60913854e91532
+      SMTP_PASS: 38f2066d7bc43b
     ports:
       - "5000:5000"
     volumes:
