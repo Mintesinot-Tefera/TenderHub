@@ -10,4 +10,8 @@ export interface IUserRepository {
   verifyEmail(userId: string): Promise<void>;
   setVerificationToken(userId: string, token: string): Promise<void>;
   linkGoogleId(userId: string, googleId: string): Promise<void>;
+  findByResetToken(token: string): Promise<{ userId: string; expiresAt: Date } | null>;
+  setResetToken(userId: string, token: string, expiresAt: Date): Promise<void>;
+  clearResetToken(userId: string): Promise<void>;
+  setPassword(userId: string, passwordHash: string): Promise<void>;
 }

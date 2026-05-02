@@ -58,6 +58,11 @@ export const submitBidSchema = z.object({
   deliveryDays: z.coerce.number().int().positive(),
 });
 
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
+
 export const createTenderSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters'),
   description: z.string().min(20, 'Description must be at least 20 characters'),

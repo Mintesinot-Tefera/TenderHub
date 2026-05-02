@@ -72,6 +72,12 @@ export const authApi = {
 
   googleAuth: (idToken: string, role?: UserRole) =>
     api.post<AuthResult>('/auth/google', { idToken, role }).then((r) => r.data),
+
+  forgotPassword: (email: string) =>
+    api.post<{ message: string }>('/auth/forgot-password', { email }).then((r) => r.data),
+
+  resetPassword: (token: string, password: string) =>
+    api.post<{ message: string }>('/auth/reset-password', { token, password }).then((r) => r.data),
 };
 
 // --- Categories ---

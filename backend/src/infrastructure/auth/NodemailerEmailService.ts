@@ -13,6 +13,31 @@ export class NodemailerEmailService implements IEmailService {
     },
   });
 
+  async sendPasswordResetEmail(to: string, token: string): Promise<void> {
+    const resetUrl = `${env.frontendUrl}/reset-password?token=${token}`;
+
+    await this.transporter.sendMail({
+      from: `"TenderHub" <no-reply@tenderhub.com>`,
+      to,
+      subject: 'Reset your TenderHub password',
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
+          <h2 style="color:#1e40af">Reset your password</h2>
+          <p>We received a request to reset your TenderHub password. Click the button below to choose a new one.</p>
+          <a href="${resetUrl}"
+             style="display:inline-block;margin:16px 0;padding:12px 24px;background:#1e40af;color:#fff;text-decoration:none;border-radius:6px;font-weight:600">
+            Reset Password
+          </a>
+          <p style="color:#64748b;font-size:13px">
+            This link expires in 1 hour. If you didn't request a password reset, you can safely ignore this email.
+          </p>
+          <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0">
+          <p style="color:#94a3b8;font-size:12px">TenderHub — Tender Management Platform</p>
+        </div>
+      `,
+    });
+  }
+
   async sendVerificationEmail(to: string, token: string): Promise<void> {
     const verifyUrl = `${env.frontendUrl}/verify-email?token=${token}`;
 

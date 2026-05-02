@@ -122,4 +122,34 @@ export class PgUserRepository implements IUserRepository {
       [googleId, userId]
     );
   }
+
+  async findByResetToken(token: string): Promise<{ userId: string; expiresAt: Date } | null> {
+    const { rows } = await this.pool.query<{ id: string; reset_token_expires_at: Date }>(
+      'SELECT id, reset_token_expires_at FROM users WHERE reset_token = $1',
+      [token]
+    );
+    if (!rows[0]) return null;
+    return { userId: rows[0].id, expiresAt: rows[0].reset_token_expires_at };
+  }
+
+  async setResetToken(userId: string, token: string, expiresAt: Date): Promise<void> {
+    await this.pool.query(
+      'UPDATE users SET reset_token = $1, reset_token_expires_at = $2, updated_at = NOW() WHERE id = $3',
+      [token, expiresAt, userId]
+    );
+  }
+
+  async clearResetToken(userId: string): Promise<void> {
+    await this.pool.query(
+      'UPDATE users SET reset_token = NULL, reset_token_expires_at = NULL, updated_at = NOW() WHERE id = $1',
+      [userId]
+    );
+  }
+
+  async setPassword(userId: string, passwordHash: string): Promise<void> {
+    await this.pool.query(
+      'UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2',
+      [passwordHash, userId]
+    );
+  }
 }

@@ -13,6 +13,8 @@ import { OrgTendersPage } from './pages/OrgTendersPage';
 import { TenderFormPage } from './pages/TenderFormPage';
 import { OrgTenderBidsPage } from './pages/OrgTenderBidsPage';
 import { VerifyEmailPage } from './pages/VerifyEmailPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import type { UserRole } from './types';
 
 function Layout() {
@@ -53,6 +55,8 @@ function AppRoutes() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
       </Route>
 
       <Route element={<Layout />}>

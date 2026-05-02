@@ -38,6 +38,10 @@ describe('RegisterUser', () => {
       setVerificationToken: jest.fn(),
       findByGoogleId: jest.fn(),
       linkGoogleId: jest.fn(),
+      findByResetToken: jest.fn(),
+      setResetToken: jest.fn(),
+      clearResetToken: jest.fn(),
+      setPassword: jest.fn(),
     };
     hasher = {
       hash: jest.fn(),
@@ -45,6 +49,7 @@ describe('RegisterUser', () => {
     };
     emailService = {
       sendVerificationEmail: jest.fn(),
+      sendPasswordResetEmail: jest.fn(),
     };
     useCase = new RegisterUser(userRepo, hasher, emailService);
   });

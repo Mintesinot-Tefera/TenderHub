@@ -7,6 +7,8 @@ import { UpdateProfile } from '../../application/use-cases/auth/UpdateProfile';
 import { VerifyEmail } from '../../application/use-cases/auth/VerifyEmail';
 import { ResendVerification } from '../../application/use-cases/auth/ResendVerification';
 import { GoogleAuthUser } from '../../application/use-cases/auth/GoogleAuthUser';
+import { ForgotPassword } from '../../application/use-cases/auth/ForgotPassword';
+import { ResetPassword } from '../../application/use-cases/auth/ResetPassword';
 import { UserRole } from '../../domain/entities/User';
 
 const mockRes = () => {
@@ -25,6 +27,8 @@ describe('AuthController', () => {
   let verifyEmail: jest.Mocked<VerifyEmail>;
   let resendVerification: jest.Mocked<ResendVerification>;
   let googleAuthUser: jest.Mocked<GoogleAuthUser>;
+  let forgotPassword: jest.Mocked<ForgotPassword>;
+  let resetPassword: jest.Mocked<ResetPassword>;
   let controller: AuthController;
 
   beforeEach(() => {
@@ -35,7 +39,9 @@ describe('AuthController', () => {
     verifyEmail = { execute: jest.fn() } as any;
     resendVerification = { execute: jest.fn() } as any;
     googleAuthUser = { execute: jest.fn() } as any;
-    controller = new AuthController(registerUser, loginUser, getCurrentUser, updateProfile, verifyEmail, resendVerification, googleAuthUser);
+    forgotPassword = { execute: jest.fn() } as any;
+    resetPassword = { execute: jest.fn() } as any;
+    controller = new AuthController(registerUser, loginUser, getCurrentUser, updateProfile, verifyEmail, resendVerification, googleAuthUser, forgotPassword, resetPassword);
   });
 
   describe('register', () => {

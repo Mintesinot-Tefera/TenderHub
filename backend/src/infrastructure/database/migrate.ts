@@ -26,6 +26,12 @@ async function migrate() {
     await client.query(
       'ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id VARCHAR(255) UNIQUE'
     );
+    await client.query(
+      'ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token VARCHAR(255)'
+    );
+    await client.query(
+      'ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token_expires_at TIMESTAMPTZ'
+    );
     console.log('✓ Database schema applied successfully');
   } finally {
     client.release();

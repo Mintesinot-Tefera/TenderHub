@@ -38,6 +38,10 @@ describe('LoginUser', () => {
       setVerificationToken: jest.fn(),
       findByGoogleId: jest.fn(),
       linkGoogleId: jest.fn(),
+      findByResetToken: jest.fn(),
+      setResetToken: jest.fn(),
+      clearResetToken: jest.fn(),
+      setPassword: jest.fn(),
     };
     hasher = { hash: jest.fn(), compare: jest.fn() };
     tokenService = { sign: jest.fn(), verify: jest.fn() };

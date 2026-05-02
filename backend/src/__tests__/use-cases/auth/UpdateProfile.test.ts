@@ -34,6 +34,10 @@ describe('UpdateProfile', () => {
       setVerificationToken: jest.fn(),
       findByGoogleId: jest.fn(),
       linkGoogleId: jest.fn(),
+      findByResetToken: jest.fn(),
+      setResetToken: jest.fn(),
+      clearResetToken: jest.fn(),
+      setPassword: jest.fn(),
     };
     useCase = new UpdateProfile(userRepo);
   });

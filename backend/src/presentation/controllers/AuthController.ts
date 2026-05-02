@@ -6,7 +6,9 @@ import { UpdateProfile } from '../../application/use-cases/auth/UpdateProfile';
 import { VerifyEmail } from '../../application/use-cases/auth/VerifyEmail';
 import { ResendVerification } from '../../application/use-cases/auth/ResendVerification';
 import { GoogleAuthUser } from '../../application/use-cases/auth/GoogleAuthUser';
-import { registerSchema, loginSchema, updateProfileSchema } from '../validators/schemas';
+import { ForgotPassword } from '../../application/use-cases/auth/ForgotPassword';
+import { ResetPassword } from '../../application/use-cases/auth/ResetPassword';
+import { registerSchema, loginSchema, updateProfileSchema, resetPasswordSchema } from '../validators/schemas';
 import { z } from 'zod';
 import { UserRole } from '../../domain/entities/User';
 
@@ -18,7 +20,9 @@ export class AuthController {
     private readonly updateProfileUC: UpdateProfile,
     private readonly verifyEmailUC: VerifyEmail,
     private readonly resendVerificationUC: ResendVerification,
-    private readonly googleAuthUser: GoogleAuthUser
+    private readonly googleAuthUser: GoogleAuthUser,
+    private readonly forgotPasswordUC: ForgotPassword,
+    private readonly resetPasswordUC: ResetPassword
   ) {}
 
   register = async (req: Request, res: Response): Promise<void> => {
@@ -68,6 +72,18 @@ export class AuthController {
       role: z.nativeEnum(UserRole).optional(),
     }).parse(req.body);
     const result = await this.googleAuthUser.execute({ idToken, role });
+    res.json(result);
+  };
+
+  forgotPassword = async (req: Request, res: Response): Promise<void> => {
+    const { email } = z.object({ email: z.string().email() }).parse(req.body);
+    const result = await this.forgotPasswordUC.execute(email);
+    res.json(result);
+  };
+
+  resetPassword = async (req: Request, res: Response): Promise<void> => {
+    const { token, password } = resetPasswordSchema.parse(req.body);
+    const result = await this.resetPasswordUC.execute(token, password);
     res.json(result);
   };
 }

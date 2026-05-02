@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS users (
   email_verified BOOLEAN NOT NULL DEFAULT FALSE,
   verification_token VARCHAR(255),
   google_id VARCHAR(255) UNIQUE,
+  reset_token VARCHAR(255),
+  reset_token_expires_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

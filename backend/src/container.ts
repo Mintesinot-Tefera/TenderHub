@@ -18,6 +18,8 @@ import { UpdateProfile } from './application/use-cases/auth/UpdateProfile';
 import { VerifyEmail } from './application/use-cases/auth/VerifyEmail';
 import { ResendVerification } from './application/use-cases/auth/ResendVerification';
 import { GoogleAuthUser } from './application/use-cases/auth/GoogleAuthUser';
+import { ForgotPassword } from './application/use-cases/auth/ForgotPassword';
+import { ResetPassword } from './application/use-cases/auth/ResetPassword';
 import { ListTenders } from './application/use-cases/tenders/ListTenders';
 import { GetTenderById } from './application/use-cases/tenders/GetTenderById';
 import { CreateTender } from './application/use-cases/tenders/CreateTender';
@@ -64,6 +66,8 @@ const updateProfile = new UpdateProfile(userRepo);
 const verifyEmail = new VerifyEmail(userRepo, tokenService);
 const resendVerification = new ResendVerification(userRepo, emailService);
 const googleAuthUser = new GoogleAuthUser(userRepo, tokenService);
+const forgotPassword = new ForgotPassword(userRepo, emailService);
+const resetPassword = new ResetPassword(userRepo, hasher);
 const listTenders = new ListTenders(tenderRepo);
 const getTenderById = new GetTenderById(tenderRepo);
 const createTender = new CreateTender(tenderRepo, categoryRepo);
@@ -81,7 +85,17 @@ const postDiscussion = new PostDiscussion(discussionRepo, tenderRepo);
 const getTenderDiscussions = new GetTenderDiscussions(discussionRepo);
 
 // --- Controllers ---
-export const authController = new AuthController(registerUser, loginUser, getCurrentUser, updateProfile, verifyEmail, resendVerification, googleAuthUser);
+export const authController = new AuthController(
+  registerUser,
+  loginUser,
+  getCurrentUser,
+  updateProfile,
+  verifyEmail,
+  resendVerification,
+  googleAuthUser,
+  forgotPassword,
+  resetPassword
+);
 export const tenderController = new TenderController(listTenders, getTenderById, createTender, updateTender, updateTenderStatus, listMyTenders);
 export const categoryController = new CategoryController(listCategories);
 export const bidController = new BidController(submitBid, getMyBids, updateBid, withdrawBid, getTenderBids, reviewBid);

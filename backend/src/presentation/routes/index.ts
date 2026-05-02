@@ -20,6 +20,8 @@ router.post('/auth/login', asyncHandler(authController.login));
 router.get('/auth/verify-email', asyncHandler(authController.verifyEmail));
 router.post('/auth/resend-verification', asyncHandler(authController.resendVerification));
 router.post('/auth/google', asyncHandler(authController.googleAuth));
+router.post('/auth/forgot-password', asyncHandler(authController.forgotPassword));
+router.post('/auth/reset-password', asyncHandler(authController.resetPassword));
 router.get('/auth/me', authMiddleware, asyncHandler(authController.me));
 router.patch('/auth/profile', authMiddleware, asyncHandler(authController.updateProfile));
 
