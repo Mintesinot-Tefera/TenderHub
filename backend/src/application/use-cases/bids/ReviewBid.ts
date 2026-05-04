@@ -1,5 +1,7 @@
 import { IBidRepository } from '../../../domain/repositories/IBidRepository';
 import { ITenderRepository } from '../../../domain/repositories/ITenderRepository';
+import { IUserRepository } from '../../../domain/repositories/IUserRepository';
+import { IEmailService } from '../../services/IEmailService';
 import { Bid, BidStatus } from '../../../domain/entities/Bid';
 import { TenderStatus } from '../../../domain/entities/Tender';
 import { NotFoundError, ForbiddenError, ValidationError } from '../../../domain/errors/AppError';
@@ -21,7 +23,9 @@ const STATUS_MAP: Record<ReviewAction, BidStatus> = {
 export class ReviewBid {
   constructor(
     private readonly bidRepo: IBidRepository,
-    private readonly tenderRepo: ITenderRepository
+    private readonly tenderRepo: ITenderRepository,
+    private readonly userRepo: IUserRepository,
+    private readonly emailService: IEmailService
   ) {}
 
   async execute(input: ReviewBidInput): Promise<Bid> {
@@ -48,6 +52,20 @@ export class ReviewBid {
     // Awarding a bid closes the tender to further bids
     if (input.action === 'accept') {
       await this.tenderRepo.updateStatus(tender.id, TenderStatus.AWARDED);
+    }
+
+    // Notify the bidder when their bid is accepted or rejected (fire-and-forget)
+    if (input.action === 'accept' || input.action === 'reject') {
+      const emailStatus = input.action === 'accept' ? 'ACCEPTED' : 'REJECTED';
+      this.userRepo.findById(bid.bidderId)
+        .then(bidder => {
+          if (bidder) {
+            this.emailService
+              .sendBidReviewedEmail(bidder.email, tender.title, emailStatus)
+              .catch(err => console.error('Failed to send bid reviewed email:', err));
+          }
+        })
+        .catch(err => console.error('Failed to look up bidder for bid notification:', err));
     }
 
     return updatedBid;

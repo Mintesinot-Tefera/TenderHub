@@ -1,6 +1,8 @@
 import { SubmitBid } from '../../../application/use-cases/bids/SubmitBid';
 import { IBidRepository } from '../../../domain/repositories/IBidRepository';
 import { ITenderRepository } from '../../../domain/repositories/ITenderRepository';
+import { IUserRepository } from '../../../domain/repositories/IUserRepository';
+import { IEmailService } from '../../../application/services/IEmailService';
 import { Bid, BidStatus } from '../../../domain/entities/Bid';
 import { Tender, TenderStatus } from '../../../domain/entities/Tender';
 
@@ -41,6 +43,8 @@ const makeBid = (overrides: Partial<Bid> = {}): Bid => ({
 describe('SubmitBid', () => {
   let bidRepo: jest.Mocked<IBidRepository>;
   let tenderRepo: jest.Mocked<ITenderRepository>;
+  let userRepo: jest.Mocked<IUserRepository>;
+  let emailService: jest.Mocked<IEmailService>;
   let useCase: SubmitBid;
 
   const dto = {
@@ -71,7 +75,28 @@ describe('SubmitBid', () => {
       update: jest.fn(),
       updateStatus: jest.fn(),
     };
-    useCase = new SubmitBid(bidRepo, tenderRepo);
+    userRepo = {
+      findById: jest.fn().mockResolvedValue(null),
+      findByEmail: jest.fn(),
+      findByVerificationToken: jest.fn(),
+      findByGoogleId: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      verifyEmail: jest.fn(),
+      setVerificationToken: jest.fn(),
+      linkGoogleId: jest.fn(),
+      findByResetToken: jest.fn(),
+      setResetToken: jest.fn(),
+      clearResetToken: jest.fn(),
+      setPassword: jest.fn(),
+    };
+    emailService = {
+      sendVerificationEmail: jest.fn(),
+      sendPasswordResetEmail: jest.fn(),
+      sendBidSubmittedEmail: jest.fn().mockResolvedValue(undefined),
+      sendBidReviewedEmail: jest.fn().mockResolvedValue(undefined),
+    };
+    useCase = new SubmitBid(bidRepo, tenderRepo, userRepo, emailService);
   });
 
   it('throws 404 when tender does not exist', async () => {

@@ -50,6 +50,8 @@ describe('RegisterUser', () => {
     emailService = {
       sendVerificationEmail: jest.fn(),
       sendPasswordResetEmail: jest.fn(),
+      sendBidSubmittedEmail: jest.fn(),
+      sendBidReviewedEmail: jest.fn(),
     };
     useCase = new RegisterUser(userRepo, hasher, emailService);
   });

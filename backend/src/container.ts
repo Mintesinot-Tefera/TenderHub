@@ -75,12 +75,12 @@ const updateTender = new UpdateTender(tenderRepo, categoryRepo);
 const updateTenderStatus = new UpdateTenderStatus(tenderRepo);
 const listMyTenders = new ListMyTenders(tenderRepo);
 const listCategories = new ListCategories(categoryRepo);
-const submitBid = new SubmitBid(bidRepo, tenderRepo);
+const submitBid = new SubmitBid(bidRepo, tenderRepo, userRepo, emailService);
 const getMyBids = new GetMyBids(bidRepo);
 const updateBid = new UpdateBid(bidRepo, tenderRepo);
 const withdrawBid = new WithdrawBid(bidRepo);
 const getTenderBids = new GetTenderBids(bidRepo, tenderRepo);
-const reviewBid = new ReviewBid(bidRepo, tenderRepo);
+const reviewBid = new ReviewBid(bidRepo, tenderRepo, userRepo, emailService);
 const postDiscussion = new PostDiscussion(discussionRepo, tenderRepo);
 const getTenderDiscussions = new GetTenderDiscussions(discussionRepo);
 

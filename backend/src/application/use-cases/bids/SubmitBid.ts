@@ -1,5 +1,7 @@
 import { IBidRepository } from '../../../domain/repositories/IBidRepository';
 import { ITenderRepository } from '../../../domain/repositories/ITenderRepository';
+import { IUserRepository } from '../../../domain/repositories/IUserRepository';
+import { IEmailService } from '../../services/IEmailService';
 import { Bid } from '../../../domain/entities/Bid';
 import { TenderStatus } from '../../../domain/entities/Tender';
 import { SubmitBidDTO } from '../../dtos/BidDTO';
@@ -12,7 +14,9 @@ import {
 export class SubmitBid {
   constructor(
     private readonly bidRepo: IBidRepository,
-    private readonly tenderRepo: ITenderRepository
+    private readonly tenderRepo: ITenderRepository,
+    private readonly userRepo: IUserRepository,
+    private readonly emailService: IEmailService
   ) {}
 
   async execute(dto: SubmitBidDTO): Promise<Bid> {
@@ -41,9 +45,20 @@ export class SubmitBid {
       throw new ConflictError('You have already submitted a bid for this tender');
     }
 
+    let bid: Bid;
+
     // Re-activate a previously withdrawn bid by updating it
     if (existing) {
-      return this.bidRepo.update(existing.id, {
+      bid = await this.bidRepo.update(existing.id, {
+        amount: dto.amount,
+        proposal: dto.proposal,
+        deliveryDays: dto.deliveryDays,
+        documentUrl: dto.documentUrl,
+      });
+    } else {
+      bid = await this.bidRepo.create({
+        tenderId: dto.tenderId,
+        bidderId: dto.bidderId,
         amount: dto.amount,
         proposal: dto.proposal,
         deliveryDays: dto.deliveryDays,
@@ -51,13 +66,17 @@ export class SubmitBid {
       });
     }
 
-    return this.bidRepo.create({
-      tenderId: dto.tenderId,
-      bidderId: dto.bidderId,
-      amount: dto.amount,
-      proposal: dto.proposal,
-      deliveryDays: dto.deliveryDays,
-      documentUrl: dto.documentUrl,
-    });
+    // Notify the organization of the new bid (fire-and-forget)
+    this.userRepo.findById(tender.organizationId)
+      .then(org => {
+        if (org) {
+          this.emailService
+            .sendBidSubmittedEmail(org.email, tender.title, tender.referenceNumber)
+            .catch(err => console.error('Failed to send bid submitted email:', err));
+        }
+      })
+      .catch(err => console.error('Failed to look up org for bid notification:', err));
+
+    return bid;
   }
 }
